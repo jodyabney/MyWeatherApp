@@ -12,12 +12,16 @@ import CoreLocation
 class WeatherVC: UIViewController {
     
     //MARK: - IBOutlets
+    @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var cityLabel: UILabel!
     
     
     //MARK: - Properties
     
     var locationManager = CLLocationManager()
+    
+    var dateFormatter = DateFormatter()
+    
     
     
     //MARK: - ViewDidLoad
@@ -40,10 +44,11 @@ class WeatherVC: UIViewController {
             lookUpCurrentLocation { (place) in
                 self.cityLabel.text = place?.locality
             }
-            
-            
-
         }
+        
+        dateFormatter.dateStyle = .full
+        let currentDateString = dateFormatter.string(from: Date())
+        dateLabel.text = currentDateString
         
     }
     
