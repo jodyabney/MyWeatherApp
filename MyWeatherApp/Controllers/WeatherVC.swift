@@ -30,7 +30,7 @@ class WeatherVC: UIViewController {
     //MARK: - Properties
     
 
-    var weatherData: OneCallWeatherData?
+    var weatherData: APIWeatherData?
     var weather: WeatherModel?
     
     var locationManager = CLLocationManager()
@@ -38,6 +38,7 @@ class WeatherVC: UIViewController {
     var countryCode: String?
     var stateOrProvince: String?
     var cityName: String?
+    var timezone: String?
     
     var forecastType: ForecastType = .hourly
     
@@ -226,7 +227,7 @@ extension WeatherVC: CLLocationManagerDelegate {
         // .requestLocation will only pass one location to the locations array
         // hence we can access it by taking the first element of the array
         if let validLocation = locations.first {
-            locationManager.stopUpdatingLocation()
+            //locationManager.stopUpdatingLocation()
             currentLocation = validLocation
             
             let latitude = Double(validLocation.coordinate.latitude)
@@ -264,6 +265,7 @@ extension WeatherVC: UITableViewDataSource {
         guard weather != nil else { return ForecastTVC() }
         
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ForecastCell") as? ForecastTVC{
+            
             switch forecastType {
             case .hourly:
                 cell.updateView(hourlyForecast: weather!.hourlyWeather[indexPath.row])
@@ -272,6 +274,7 @@ extension WeatherVC: UITableViewDataSource {
                 cell.updateView(dailyForecast: weather!.dailyWeather[indexPath.row])
                 return cell
             }
+            
         } else {
             return ForecastTVC()
         }

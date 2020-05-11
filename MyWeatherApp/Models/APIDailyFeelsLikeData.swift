@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct DailyFeelsLikeData: Codable {
+struct APIDailyFeelsLikeData: Codable {
     
     //MARK: - Properties
     

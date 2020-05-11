@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct WeatherArrayData: Codable {
+struct APIWeatherArrayData: Codable {
     var id: Int // Weather condition id
     var main: String // Group of weather parameters (Rain, Snow, Extreme etc.)
     var description: String // Weather condition within the group (full list of weather conditions). Get the output in your language

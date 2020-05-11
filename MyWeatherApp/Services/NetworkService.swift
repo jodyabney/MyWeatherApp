@@ -43,7 +43,7 @@ struct NetworkService {
         longitude = String(fromDouble)
     }
     
-    public func getWeather(onSuccess: @escaping (OneCallWeatherData) -> Void,
+    public func getWeather(onSuccess: @escaping (APIWeatherData) -> Void,
                     onError: @escaping (String) -> Void) {
         let url = URL(string: getURL())!
         
@@ -62,7 +62,7 @@ struct NetworkService {
                 do {
                     if response.statusCode == 200 {
                         // parse the successful result (OneCallWeatherData)
-                        let weatherData = try JSONDecoder().decode(OneCallWeatherData.self, from: data)
+                        let weatherData = try JSONDecoder().decode(APIWeatherData.self, from: data)
                         // handle success
                         onSuccess(weatherData)
                     } else {

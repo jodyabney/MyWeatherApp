@@ -9,15 +9,15 @@
 import Foundation
 
 //Parameters of API response
-struct OneCallWeatherData: Codable {
+struct APIWeatherData: Codable {
 
     //MARK: - Properties
     
     let lat: Double // Geographical coordinates of the location (latitude)
     let lon: Double // Geographical coordinates of the location (longitude)
     let timezone: String // Timezone name for the requested location
-    let current: CurrentWeatherData // Current weather data API response
-    let hourly: [HourlyWeatherData] // Hourly forecast weather data API response
-    let daily: [DailyWeatherData] // Daily forecast weather data API response
+    let current: APICurrentWeatherData // Current weather data API response
+    let hourly: [APIHourlyWeatherData] // Hourly forecast weather data API response
+    let daily: [APIDailyWeatherData] // Daily forecast weather data API response
     
 }
