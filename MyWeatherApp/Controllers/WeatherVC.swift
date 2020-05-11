@@ -23,6 +23,8 @@ class WeatherVC: UIViewController {
     @IBOutlet weak var currentTempLabel: UILabel!
     @IBOutlet weak var currentConditionImageView: UIImageView!
     
+    @IBOutlet weak var forecastTypeSelector: UISegmentedControl!
+    
     @IBOutlet weak var tableView: UITableView!
 
     //MARK: - Properties
