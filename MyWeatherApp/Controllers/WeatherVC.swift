@@ -29,6 +29,9 @@ class WeatherVC: UIViewController {
 
     //MARK: - Properties
     
+    // restrict number of hourly and daily forecasts
+    let numberOfForecast = 5
+    
 
     var weatherData: APIWeatherData?
     var weather: WeatherModel?
@@ -73,9 +76,12 @@ class WeatherVC: UIViewController {
         {
             locationManager = CLLocationManager()
             locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest
             locationManager.requestWhenInUseAuthorization()
             locationManager.startUpdatingLocation()
+            
+            // try to minimize battery drain while still achieving accurate location monitoring
+            locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
+            locationManager.pausesLocationUpdatesAutomatically = true
         }
     }
     
@@ -127,13 +133,17 @@ class WeatherVC: UIViewController {
             dailyWeather.append(daily)
         }
         
+        // set up the weather model
         weather = WeatherModel(currentTemp: currentTemp, conditionId: conditionId, conditionMain: conditionMain, conditionDescription: conditionDescription, conditionImageName: conditionImageName, hourlyWeather: hourlyWeather, dailyWeather: dailyWeather)
     }
     
-    func updateCurrentWeather() {
+    func updateCityView() {
         if let city = cityName {
             cityLabel.text = city
         }
+    }
+    
+    func updateCurrentWeather() {
         
         if let weatherData = self.weatherData {
             let mainCondition = weatherData.current.weather[0].main
@@ -149,6 +159,7 @@ class WeatherVC: UIViewController {
         
     }
     
+    // determine which icon based on condition id
     func getConditionImageName(_ conditionId: Int) -> String {
         
         switch conditionId {
@@ -202,7 +213,6 @@ extension WeatherVC: CLLocationManagerDelegate {
     
     func lookUpCurrentLocation() {
         // Use the last reported location.
-        //        if let lastLocation = self.locationManager.location {
         let geocoder = CLGeocoder()
         
         // Look up the location and pass it to the completion handler
@@ -210,18 +220,18 @@ extension WeatherVC: CLLocationManagerDelegate {
             if let error = error {
                 debugPrint("Error finding city info: \(error.localizedDescription)")
             }
-            
+            // get the city from the location
             if let placemarks = placemarks {
-                if placemarks.count > 0 {
-                    let placemark = placemarks[0]
-                    if let city = placemark.locality {
-                        self.cityName = city
-                    }
+                let placemark = placemarks[0]
+                if let city = placemark.locality {
+                    self.cityName = city
+                        
+                    // update the city displayed in the app
+                    self.updateCityView()
                 }
             }
         }
     }
-    
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // .requestLocation will only pass one location to the locations array
@@ -253,11 +263,10 @@ extension WeatherVC: UITableViewDataSource {
         switch forecastType {
         case .hourly:
             guard weatherData?.hourly != nil else { return 0 }
-            return 5 // restrict to 5 per requirement
         case .daily:
             guard weatherData?.daily != nil else { return 0 }
-            return 5 // restrict to 5 per requirement
         }
+        return numberOfForecast
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
