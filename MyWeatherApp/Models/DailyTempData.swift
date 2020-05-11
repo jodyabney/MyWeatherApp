@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct DailyTemp: Codable {
+struct DailyTempData: Codable {
     
     //MARK: - Properties
     

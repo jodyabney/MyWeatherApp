@@ -16,11 +16,13 @@ struct NetworkService {
     
     //MARK: - Properties
     
+    // api key created for app
     private let apiKey = "273fab6e6c50fd8c332693983fa661a8"
     
+    // use the OneCall api, exclude minutely forecast, and set units to Imperial
     private let URL_BASE = "https://api.openweathermap.org/data/2.5/onecall?exclude=minutely&units=imperial&appid="
     
-    // se Graniteville, SC, USA as a default location
+    // Use Graniteville, SC, USA as a default location
     private(set) public var latitude = "33.54229142091232"
     private(set) public var longitude = "-81.84014801748354"
     
@@ -30,7 +32,6 @@ struct NetworkService {
     
     public func getURL() -> String {
         let urlString = URL_BASE + apiKey + "&lat=" + latitude + "&lon=" + longitude
-        print(urlString)
         return urlString
     }
     

@@ -21,13 +21,12 @@ class ForecastTVC: UITableViewCell {
     func updateView(hourlyForecast: HourlyWeatherModel) {
         
         let tf = DateFormatter()
-        //tf.dateFormat = "HH"
         tf.timeStyle = .short
         let strDate = tf.string(from: hourlyForecast.time)
         
         timeDateLabel.text = strDate
         forecastImage.image = UIImage(systemName: hourlyForecast.conditionImageName)
-        tempLabel.text = String(format: "%.1f", hourlyForecast.temp)
+        tempLabel.text = String(format: "%.1f", hourlyForecast.temp) + " F"
     }
     
     func updateView(dailyForecast: DailyWeatherModel) {
@@ -36,10 +35,11 @@ class ForecastTVC: UITableViewCell {
         tf.dateStyle = .full
         let strDate = tf.string(from: dailyForecast.date)
         let dateParts = strDate.split(separator: ",")
+        let dayOfWeek = String(dateParts[0])
         
-        timeDateLabel.text = String(dateParts[0])
+        timeDateLabel.text = dayOfWeek
         forecastImage.image = UIImage(systemName: dailyForecast.conditionImageName)
-        tempLabel.text = "High: \(String(format: "%.1f", dailyForecast.maxTemp))\nLow: \(String(format: "%.1f", dailyForecast.minTemp))"
+        tempLabel.text = String(format: "%.1f", dailyForecast.maxTemp) + " F" + "  " + String(format: "%.1f", dailyForecast.minTemp) + " F"
     }
     
     

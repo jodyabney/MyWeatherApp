@@ -48,11 +48,10 @@ class WeatherVC: UIViewController {
         // display the current date
         dateLabel.text = getCurrentDateAsString()
         
+        // get current location
         getLocation()
         
-        // set up weather manager delegate
-        //store.delegate = self
-        
+        // set the tableview delegate
         tableView.dataSource = self
     }
     
@@ -81,6 +80,8 @@ class WeatherVC: UIViewController {
         NetworkService.shared.getWeather(onSuccess: { (weatherData) in
             self.weatherData = weatherData
             
+            self.updateWeatherModel()
+            
             self.updateCurrentWeather()
             
             self.tableView.reloadData()
@@ -88,6 +89,42 @@ class WeatherVC: UIViewController {
         }) { (errorMessage) in
             debugPrint(errorMessage)
         }
+    }
+    
+    func updateWeatherModel() {
+        guard weatherData != nil else { return }
+        
+        // set up current weather info
+        let conditionId = weatherData!.current.weather[0].id
+        let conditionImageName = getConditionImageName(conditionId)
+        let conditionMain = weatherData!.current.weather[0].main
+        let conditionDescription = weatherData!.current.weather[0].description
+        let currentTemp = weatherData!.current.temp
+        
+        // set up hourly weather info
+        var hourlyWeather = [HourlyWeatherModel]()
+        for i in 1...5 {
+            let time = Date(timeIntervalSince1970: TimeInterval(weatherData!.hourly[i].dt))
+            let temp = weatherData!.hourly[i].temp
+            let conditionId = weatherData!.hourly[i].weather[0].id
+            let conditionImageName = getConditionImageName(conditionId)
+            let hourly = HourlyWeatherModel(time: time, temp: temp, conditionId: conditionId, conditionImageName: conditionImageName)
+            hourlyWeather.append(hourly)
+        }
+        
+        // set up daily weather info
+        var dailyWeather = [DailyWeatherModel]()
+        for i in 1...5 {
+            let date = Date(timeIntervalSince1970: TimeInterval(weatherData!.daily[i].dt))
+            let minTemp = weatherData!.daily[i].temp.min
+            let maxTemp = weatherData!.daily[i].temp.max
+            let conditionId = weatherData!.daily[i].weather[0].id
+            let conditionImageName = getConditionImageName(conditionId)
+            let daily = DailyWeatherModel(date: date, minTemp: minTemp, maxTemp: maxTemp, conditionId: conditionId, conditionImageName: conditionImageName)
+            dailyWeather.append(daily)
+        }
+        
+        weather = WeatherModel(currentTemp: currentTemp, conditionId: conditionId, conditionMain: conditionMain, conditionDescription: conditionDescription, conditionImageName: conditionImageName, hourlyWeather: hourlyWeather, dailyWeather: dailyWeather)
     }
     
     func updateCurrentWeather() {
@@ -98,10 +135,10 @@ class WeatherVC: UIViewController {
         if let weatherData = self.weatherData {
             let mainCondition = weatherData.current.weather[0].main
             let conditionDescription = weatherData.current.weather[0].description
-            currentConditionDescription.text = mainCondition + ": " + conditionDescription
+            currentConditionDescription.text = mainCondition + " - " + conditionDescription
             
             let currentTemp = weatherData.current.temp
-            currentTempLabel.text = String(format: "%.1f", currentTemp)
+            currentTempLabel.text = String(format: "%.1f", currentTemp) + " F"
             
             let conditionImageName = getConditionImageName(weatherData.current.weather[0].id)
             currentConditionImageView.image = UIImage(systemName: conditionImageName)
@@ -146,9 +183,6 @@ class WeatherVC: UIViewController {
     }
     
 }
-
-
-
 
 
 //MARK: - CLLocation Manager Delegate Methods
@@ -202,76 +236,38 @@ extension WeatherVC: CLLocationManagerDelegate {
             lookUpCurrentLocation()
             
             getWeather()
+            
+            updateWeatherModel()
         }
     }
 }
 
-//            store.fetchWeatherData(location: location!,
-//                                   onSuccess: { (weatherData) in
-//                print("weather data was successful")
-//
-//                // current weather
-//                let currentTemp = weatherData.current.temp
-//                let conditionId = weatherData.current.weather[0].id
-//                let conditionMain = weatherData.current.weather[0].main
-//                let conditionDescription = weatherData.current.weather[0].description
-
-//                // get hourly weather for 5-hours
-//                var hourlyWeather = [HourlyWeatherModel]()
-//                for i in 0...4 {
-//                    let hourlyDate = Date(timeIntervalSince1970: weatherData.hourly[i].dt)
-//                    let hourlyConditionid = weatherData.hourly[i].weather[0].id
-//                    let hourlyTemp = weatherData.hourly[i].temp
-//
-//                    let hourForecast = HourlyWeatherModel(time: hourlyDate, temp: hourlyTemp, conditionId: hourlyConditionid)
-//                    hourlyWeather.append(hourForecast)
-//                }
-//
-//                // get daily weather for 5-days
-//                var dailyWeather = [DailyWeatherModel]()
-//                for i in 0...4 {
-//                    let dailyDate = Date(timeIntervalSince1970: weatherData.daily[i].dt)
-//                    let dailyConditionid = weatherData.daily[i].weather[0].id
-//                    let dailyHighTemp = weatherData.daily[i].temp.max
-//                    let dailyLowTemp = weatherData.daily[i].temp.min
-//
-//                    let dailyForecast = DailyWeatherModel(time: dailyDate, minTemp: dailyLowTemp, maxTemp: dailyHighTemp, conditionId: dailyConditionid)
-//                    dailyWeather.append(dailyForecast)
-//                }
-
-//                self.weather = WeatherModel(currentTemp: currentTemp, conditionId: conditionId, conditionMain: conditionMain, conditionDescription: conditionDescription)//, hourlyWeather: hourlyWeather, dailyWeather: dailyWeather)
-//
-//                self.updateCurrentWeather()
-//
-//        }, onError: { (error) in
-//            print("there was an error: \(error)")
-//        })
-//        }
-//    }
-//}
-
 
 //  MARK: - Table View DataSource Methods
+
 extension WeatherVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard weatherData != nil else { return 0 }
-        return 5 // restrict to 5 forecast entries
+        switch forecastType {
+        case .hourly:
+            guard weatherData?.hourly != nil else { return 0 }
+            return 5 // restrict to 5 per requirement
+        case .daily:
+            guard weatherData?.daily != nil else { return 0 }
+            return 5 // restrict to 5 per requirement
+        }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        guard weather != nil else { return ForecastTVC() }
+        
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ForecastCell") as? ForecastTVC{
             switch forecastType {
             case .hourly:
-                let forecastData = weatherData?.hourly[indexPath.row]
-                let date = Date(timeIntervalSince1970: TimeInterval(forecastData!.dt))
-                let hourlyForecast = HourlyWeatherModel(time: date, temp: forecastData!.temp, conditionId: (forecastData?.weather[0].id)!)
-                cell.updateView(hourlyForecast: hourlyForecast)
+                cell.updateView(hourlyForecast: weather!.hourlyWeather[indexPath.row])
                 return cell
             case .daily:
-                let forecastData = weatherData?.daily[indexPath.row]
-                let date = Date(timeIntervalSince1970: TimeInterval(forecastData!.dt))
-                let dailyForecast = DailyWeatherModel(date: date, minTemp: forecastData!.temp.min, maxTemp: forecastData!.temp.max, conditionId: forecastData!.weather[0].id)
-                cell.updateView(dailyForecast: dailyForecast)
+                cell.updateView(dailyForecast: weather!.dailyWeather[indexPath.row])
                 return cell
             }
         } else {
@@ -281,18 +277,3 @@ extension WeatherVC: UITableViewDataSource {
 
 
 }
-
-
-////MARK: - WeatherManager Delegate Methods
-//extension WeatherVC: WeatherManagerDelegate {
-//    func didUpdateWeather(_ weatherManager: WeatherStore, weather: OneCallWeatherData) {
-//        DispatchQueue.main.async {
-//            self.currentTempLabel.text = String(format: "%.1f", weather.)
-//        }
-//    }
-//
-//    func didFailWithError(error: Error) {
-//        print(error)
-//    }
-//
-//}

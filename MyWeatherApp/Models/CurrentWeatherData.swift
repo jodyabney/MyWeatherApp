@@ -24,5 +24,5 @@ struct CurrentWeatherData: Codable {
     let clouds: Int // Cloudiness, %
     let wind_speed: Double // Wind speed. Unit Default: meter/sec, Metric: meter/sec, Imperial: miles/hour. How to change units format
     let wind_deg: Int // Wind direction, degrees (meteorological)
-    let weather: [Weather] //  (more info Weather condition codes)
+    let weather: [WeatherArrayData] //  (more info Weather condition codes)
 }

@@ -16,8 +16,8 @@ struct OneCallWeatherData: Codable {
     let lat: Double // Geographical coordinates of the location (latitude)
     let lon: Double // Geographical coordinates of the location (longitude)
     let timezone: String // Timezone name for the requested location
-    let current: CurrentWeather // Current weather data API response
-    let hourly: [HourlyWeather] // Hourly forecast weather data API response
-    let daily: [DailyWeather] // Daily forecast weather data API response
+    let current: CurrentWeatherData // Current weather data API response
+    let hourly: [HourlyWeatherData] // Hourly forecast weather data API response
+    let daily: [DailyWeatherData] // Daily forecast weather data API response
     
 }
